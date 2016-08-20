@@ -1,0 +1,27 @@
+一、隐藏软件名和版本号
+1.修改源码文件src/core.nginx.h
+#版本号
+define NGINX_VERSIN  “1.8.1”
+#软件名
+define NGINX_VER      “nginx/” NGINX_VERSION
+2.修改HTTP有信息中的connection字段，防止回显具体版本号
+通用http头域：
+    通用头域包含请求和响应消息都支持的头域，通用头域包含Cache—Control、Connection、Date、Pragma、Transfer-Encoding、Upgrade、Via。对通用头域的扩展要求通讯双方都支持此扩展，如果存在不支持的通用头域，一般将会作为实体头域处理。那么也就是说有部分设备，或者是软件，能获取到connection，部分不能，要隐藏就要彻底！
+文件：src/http/ngx_http_header_filter_module.c
+内容：static char ngx_http_server_string[] = "Server: nginx" CRLF;
+3.修改HTTP错误码的返回
+有时候页面程序出现错误，nginx会代我们返回响应的错误代码，回显的时候会带上nginx和版本号
+文件：src/http/ngx_http_special_response.c
+内容：
+static u_char ngx_http_error_full_tail[] =
+"<hr><center>" NGINX_VER "</center>" CRLF
+"</body>" CRLF
+"</html>" CRLF
+;
+
+
+static u_char ngx_http_error_tail[] =
+"<hr><center>nginx</center>" CRLF
+"</body>" CRLF
+"</html>" CRLF
+;
