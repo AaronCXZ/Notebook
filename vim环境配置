@@ -1,0 +1,19 @@
+1、vim的中文帮助文档
+下载：wget http://nchc.dl.sourceforge.net/sourceforge/vimcdoc/vimcdoc-1.5.0.tar.gz
+安装 ./vimdoc.sh -i
+在vim下执行set helplang=en切换为英文帮助文档，执行set helpplang=cn切换为中文帮助文档
+2、快捷键
+%   跳转到配对的括号
+[[  跳转到代码块的开头，但代码块中'{'必须单独一行
+gD  跳转到局部变量的定义处
+''  跳转到光标上次停靠的地方，是两个单引号
+mx  设置书签，x只能是a-z的26个字母
+`x  跳转到书签处
+>   增加缩进，“x>”表示增加以下x行的缩进
+<   减少缩进，“x<”表示减少以下x行的缩进
+3、语法高亮
+在.vimrc文件中增加两行
+syntax enable
+suntax on
+启动语法高亮
+使用colorscheme desert设置配色方案，其中desert是配色方案，使用:help syntax.txt馋看帮助
