@@ -8,6 +8,7 @@ func main() {
 ```
 * 编译
 `go build -x hello.go`
+---
 ![go build.png](01.go build.png)
 
 * 不同操作系统上的规范不一样
@@ -24,8 +25,10 @@ EFL|PE|Mach-O|
 解析ELF header-->加载文件内容值内存-->从entry point开始执行代码
 + 通过entry point找到go进程的入口，使用readelf
 `readelf -h ./hello`
+  ---
 ![readelf.png](02.readelf.png)
-`dlv exec ./hello`  
+`dlv exec ./hello`
+---
 ![03.dlv exec.png](03.dlv exec.png)
 2. GMP调度
 + G：goroutine，一个计算任务，由需要执行的代码和其上下文组成，
