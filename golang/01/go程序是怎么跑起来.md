@@ -62,4 +62,14 @@ EFL|PE|Mach-O|
 * 不能处理的阻塞：CGO，syscall。执行时必须占用一个线程，sysmon(system monitor)来处理此类阻塞。
   - 如果syscall卡了很久(10ms)，就把P剥离(handoffp)
   - 如果时用户G运行很久(10ms)了，那么发信号SIGURG抢占
-* M从一个G切换到另一个G，只要把gobuf结构的几个现场字段保留下来，再把G网队列里一仍，M就可以执行其它的G了，无需进入内核态，切换成本非常低   
+* M从一个G切换到另一个G，只要把gobuf结构的几个现场字段保留下来，再把G网队列里一仍，M就可以执行其它的G了，无需进入内核态，切换成本非常低
+
+3. runtime
+- runtime.runqput：将G放入队列的逻辑
+- runtime.runqget: 从队列中取出G的逻辑,runnxt和local run queue
+- runtime.globrunqput: 将G放入全局队列(global run queue)，加锁
+- runtime.globrunqget：尝试从全局队列获取一批G
+- runtime.schedule：找到可以运行的G，并执行它
+- runtime.findrunnable：尝试从其它P中窃取G
+- runtime.sysmon：system monitor用来处理CGO或syscall造成的阻塞或G运行时间过长
+- runtime._rt0_amd64_linux：程序入口
