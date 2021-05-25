@@ -19,3 +19,19 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 先Get获取内存空间，基于这个内存做相关的处理，然后再将这个内存还回(Put)到sync.Pool。
 
+### Pool结构
+
+![sync.Pool全景图](./img/pool.png)
+
+### 源码图解
+
+![Pool.Get](./img/Get source.png)
+
+![Pool.Put](./img/Put source.png)
+
+![Pool.Get流程](./img/Pool.Get.png)
+
+![Pool.Put流程](./img/Pool.Put.png)
+
+![Pool.GC流程](./img/Pool.GC.png)
+
