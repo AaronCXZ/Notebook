@@ -16,5 +16,4 @@ pause容器主要为每个业务容器提供以下功能：
 
 5. Pod中的每个容器可以访问在Pod级别定义的Vilumes。
 
-   ![pause提供的功能](./img/pause功能.png)
-
+*[pause提供的功能](./img/pause功能.png)*
