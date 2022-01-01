@@ -120,11 +120,103 @@ function alertForMiscreant(people){
 }
 ```
 
+## 11.2 函数参数化（Parameterize Function）
 
+1. 名称
 
+2. 一个简单的速写
 
+```javascript
+function tenPercentRaise(aPerson){
+    aPerson.salary = aPerson.salary.multiply(1.1);   
+}
+function fivePercentRaise(aPerson){
+    aPerson.salary = aPerson.salary.multiply(1.05);
+}
+```
 
+重构为：
 
+```javascript
+function raise(aPerson, factor){
+    aPerson.salary = aPerson.salary.multiply(1 + factor);
+}
+```
+
+3. 动机
+
+4. 做法
+
+- 从一组相似的函数中选择一个
+- 运用改变函数声明，把需要作为参数传入的字面量添加到参数列表中
+- 修改该函数所有的调用处，使其在调用时传入该字面量
+- 测试
+- 修改函数体，令其使用新传入的参数。每使用一个新参数都要测试
+- 对于其他与之相似的函数，逐一将其调用处改为调用已经参数化的函数。每次修改后都要测试
+
+5. 范例
+
+```javascript
+function baseCharge(usage){
+    if (usage < 0) return usd(0);
+    const amount = 
+          bottomBand(usage) * 0.03 
+    	  + middleBand(usage) * 0.05 
+          + topBand(usage) * 0.07;
+    return usd(amount);
+}
+function bottomBand(usage){
+    return Math.min(usage, 100);
+}
+function middleBand(usage){
+    return usage > 100 ? Math.min(usage, 200) - 100 : 0;
+}
+function topBand(usage){
+    return usage > 200 ? usage - 200 : 0;
+}
+```
+
+middleBand函数添加参数
+
+```javascript
+function withinBand(usage, bottom, top){
+    return usage > 100 ? Math.min(usage, top) - bottom : 0;
+}
+function baseCharge(usage){
+    if (usage < 0) return usd(0);
+    const amount = 
+          bottomBand(usage) * 0.03 
+    	  + withinBand(usage， 100， 200) * 0.05 
+          + topBand(usage) * 0.07;
+    return usd(amount);
+}
+```
+
+bottomBand函数用withinBand函数代替
+
+```javascript
+function baseCharge(usage){
+    if (usage < 0) return usd(0);
+    const amount = 
+          withinBand(usage, 0, 100) * 0.03 
+    	  + withinBand(usage， 100， 200) * 0.05 
+          + topBand(usage) * 0.07;
+    return usd(amount);
+}
+```
+
+topBand函数也用withinBand函数代替，Infinity代表无穷大。
+
+```javascript
+function baseCharge(usage){
+    if (usage < 0) return usd(0);
+    const amount = 
+          withinBand(usage, 0, 100) * 0.03 
+    	  + withinBand(usage， 100， 200) * 0.05 
+          + withinBand(usage, 200, Infinity) * 0.07;
+    return usd(amount);
+}
+```
 
 
 
