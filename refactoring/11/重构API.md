@@ -218,11 +218,100 @@ function baseCharge(usage){
 }
 ```
 
+## 11.3 移除标记参数（Remove Flag Argument）
 
+1. 名称
 
+2. 一个简单的速写
 
+```javascript
+function setDimension(name, value){
+    if (name === "height"){
+        this._height = value;
+        return;
+    }
+    if (name === "width"){
+        this._width = value;
+        return;
+    }
+}
+```
 
+重构为：
 
+```javascript
+function setHeight(value) {this._height = value;}
+function setWidth(value) {this._width = value;}
+```
+
+3. 动机
+
+标记参数：调用者用它来指示被调用函数应该执行哪一部分逻辑
+
+4. 做法
+
+- 针对参数的每一种可能值，新建一个明确函数
+- 对于“用字面量值作为参数”的函数调用者，将其改为调用新建的明确函数
+
+5. 范例
+
+两组调用代码
+
+```javascript
+aShipment.deliveryDate = deliveryDate(anOrder, true);
+aShipment.deliveryDate = deliveryDate(anOrder, false);
+```
+
+deliveryDate函数的主体
+
+```javascript
+function deliveryDate(anOrder, isRush){
+    if (isRush){
+        let deliveryTime;
+        if (["MA", "CT"].includes(anOrder.deliveryState)) deliveryTime = 1;
+        else if (["NY", "NH"].includes(anOrder.deliveryState)) deliveryTime = 2;
+        else deliveryTime = 3;
+        return anOrder.placedOn.plusDays(1 + deliveryTime);
+    }
+    else {
+        let deliveryTime;
+        if (["MA", "CT", "NY"].includes(anOrder.deliveryState)) deliveryTime = 2;
+        else if (["ME", "NH"].includes(anOrder.deliveryState)) deliveryTime = 3;
+        else deliveryTime = 4;
+        return anOrder.placedOn.plusDays(2 + deliveryTime);
+    }
+}
+```
+
+使用分解条件表达式
+
+```javascript
+function deliveryDate(anOrder, isRush){
+	if (isPush) return rushDeliveryDate(anOrder);
+    else return regularDeliveryDate(anOrder);
+}
+function rushDeliveryDate(anOrder){
+    let deliveryTime;
+    if (["MA", "CT"].includes(anOrder.deliveryState)) deliveryTime = 1;
+    else if (["NY", "NH"].includes(anOrder.deliveryState)) deliveryTime = 2;
+    else deliveryTime = 3;
+    return anOrder.placedOn.plusDays(1 + deliveryTime);
+}
+function regularDeliveryDate(anOrder){
+    let deliveryTime;
+    if (["MA", "CT", "NY"].includes(anOrder.deliveryState)) deliveryTime = 2;
+    else if (["ME", "NH"].includes(anOrder.deliveryState)) deliveryTime = 3;
+    else deliveryTime = 4;
+    return anOrder.placedOn.plusDays(2 + deliveryTime);
+}
+```
+
+修改调用方代码
+
+```javascript
+aShipment.deliveryDate = rushDeliveryDate(anOrder);
+aShipment.deliveryDate = regularDeliveryDate(anOrder);
+```
 
 
 
