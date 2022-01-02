@@ -470,7 +470,116 @@ class HeatingPlan {
 
 剩下的步骤与范例一一样，替换其他调用者，然后把旧函数内联到新函数中，然后改名即可
 
+## 11.5 以查询取代参数（Replace Parameter with Query）
 
+1. 名称
+
+2. 一个简单的速写
+
+```javascript
+availableVacation(anEmployee, anEmployee.grade);
+function availableVacation(anEmployee, grade){...}
+```
+
+重构为：
+
+```javascript
+availableVacation(anEmployee)
+function availableVacation(anEmployee){
+    const grade = enEmployee.grade;
+    ...
+}
+```
+
+3. 动机
+
+参数列表应该尽量避免重复，并且参数列表越短就越容易理解
+
+4. 做法
+
+- 如果有必要，使用提炼函数将参数的计算过程提炼到一个独立的函数中
+- 将函数体内引用该参数的地方改为调用新建的函数。每次修改后执行测试
+- 全部替换完成后，使用改变函数声明将该参数去掉
+
+5. 范例
+
+```javascript
+class Order {
+    get finalPrice(){
+        const basePrice = this.quantity * this.itemPrice;
+        let discountLevel;
+        if (this.quantity > 100) discountLevel = 2;
+        else discountLevel = 1;
+        return this.discountedPrice(basePrice, discountLevel);
+    }
+    discountedPrice(basePrice, discountLevel){
+        switch (discountLevel){
+            case 1: return basePrice * 0.05;
+            case 2: return basePrice * 0.9;
+        }
+    }
+}
+```
+
+使用一查询取代临时变量
+
+```javascript
+class Order {
+    get finalPrice(){
+        const basePrice = this.quantity * this.itemPrice;
+        return this.discountedPrice(basePrice, this.discountLevel);
+    }
+    get discountLevel(){
+        return (this.quantity > 100) ? 2 : 1;
+    }
+    discountedPrice(basePrice, discountLevel){
+        switch (discountLevel){
+            case 1: return basePrice * 0.05;
+            case 2: return basePrice * 0.9;
+        }
+    }
+}
+```
+
+将discountedPrice函数中调用discountLevel参数改为调用查询函数
+
+```javascript
+class Order {
+    get finalPrice(){
+        const basePrice = this.quantity * this.itemPrice;
+        return this.discountedPrice(basePrice, this.discountLevel);
+    }
+    get discountLevel(){
+        return (this.quantity > 100) ? 2 : 1;
+    }
+    discountedPrice(basePrice, discountLevel){
+        switch (this.discountLevel){
+            case 1: return basePrice * 0.05;
+            case 2: return basePrice * 0.9;
+        }
+    }
+}
+```
+
+然后改变函数声明，移除参数
+
+```javascript
+class Order {
+    get finalPrice(){
+        const basePrice = this.quantity * this.itemPrice;
+        return this.discountedPrice(basePrice);
+    }
+    get discountLevel(){
+        return (this.quantity > 100) ? 2 : 1;
+    }
+    discountedPrice(basePrice){
+        switch (this.discountLevel){
+            case 1: return basePrice * 0.05;
+            case 2: return basePrice * 0.9;
+        }
+    }
+}
+```
 
 
 
