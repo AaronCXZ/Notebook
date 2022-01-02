@@ -313,9 +313,162 @@ aShipment.deliveryDate = rushDeliveryDate(anOrder);
 aShipment.deliveryDate = regularDeliveryDate(anOrder);
 ```
 
+## 11.4 保持对象完整（Preserve Whole Object）
 
+1. 名称
 
+2. 一个简单的速写
 
+```javascript
+const low = aRoom.daysTempRange.low;
+const high = aRoom.daysTempRange.high;
+if (aPlan.withinRange(low, high))
+```
+
+重构为：
+
+```javascript
+if (aPlan.withinRange(aRomm.days.TempRange))
+```
+
+3. 动机
+
+如果将来被调的函数需要从记录中导出更多的数据，就不用为此修改参数列表，并且传递整个记录也能缩短参数列表，让函数调用更容易看懂。
+
+4. 做法
+
+- 新建一个空函数，给它以其王总的参数列表（即传入完成对象作为参数）
+- 在新函数体内调用旧函数，并把新的参数映射到旧的参数列表
+- 执行静态检查
+- 逐一修改旧函数的调用者，令其使用新函数，每次修改之后执行测试
+- 所有调用处都修改过来之后，使用内联函数把旧函数内联带新函数体内
+- 给新函数改名，从重构开始时的容易搜索的临时名字，改为使用旧函数的名字，同时修改所有调用处
+
+5. 范例
+
+- 范例一：
+
+```javascript
+const low = aRoom.daysTempRange.low;
+const high = aRoom.daysTempRange.high;
+if (!aPlan.withinRange(low, high))
+    alerts.push("room temoerature went outside range");
+class HeatingPlan {
+    withinRange(bottm, top){
+        return (bottm >= this.,_temperatureRange.low) && (top <= this._temperatureRange.high);
+    }
+}
+```
+
+首先在HeatingPlan类中添加新的函数
+
+```javascript
+xxNEWWithinRange(aNumberRange){}
+```
+
+然后新函数调用现有函数
+
+```javascript
+xxNEWWithinRange(aNumberRange){
+    return this.withinRange(aNumberRange.low, aNumberRange.high);
+}
+```
+
+修改调用方代码，调用新函数
+
+```javascript
+if (!aPlan.xxNEWWithinRange(aRoom.daysTempRange))
+    alerts.push("room temoerature went outside range");
+```
+
+内联函数
+
+```javascript
+class HeatingPlan {
+    xxNEWWithinRange(aNumberRange){
+    	return (aNumberRange.low >= this.,_temperatureRange.low) && (aNumberRange.high <= this._temperatureRange.high);
+	}
+}
+```
+
+新函数改名为旧函数的名称
+
+```javascript
+class HeatingPlan {
+    withinRange(aNumberRange){
+    	return (aNumberRange.low >= this.,_temperatureRange.low) && (aNumberRange.high <= this._temperatureRange.high);
+	}
+}
+```
+
+修改调用方代码
+
+```javascript
+if (!aPlan.withinRange(aRoom.daysTempRange))
+    alerts.push("room temoerature went outside range");
+```
+
+- 范例二：换个方式创建新函数
+
+调用方代码：
+
+```javascript
+const low = aRoom.daysTempRange.low;
+const high = aRoom.daysTempRange.high;
+if (!aPlan.withinRange(low, high))
+    alerts.push("room temoerature went outside range");
+```
+
+首先把对旧函数的调用从条件判断中解放出来
+
+```javascript
+const low = aRoom.daysTempRange.low;
+const high = aRoom.daysTempRange.high;
+const isWithinRange = aPlan.withinRange(low, high);
+if (!isWithinRange)
+    alerts.push("room temoerature went outside range");
+```
+
+然后把输入参数也提炼出来
+
+```javascript
+const tempRange = aRoom.daysTempRange
+const low = tempRange.low;
+const high = tempRange.high;
+const isWithinRange = aPlan.withinRange(low, high);
+if (!isWithinRange)
+    alerts.push("room temoerature went outside range");
+```
+
+使用提炼函数来创建新函数
+
+```javascript
+const tempRange = aRoom.daysTempRange
+const isWithinRange = xxNEWWithinRange(aPlan, tempRange);
+if (!isWithinRange)
+    alerts.push("room temoerature went outside range");
+function xxNEWWithinRange(aPlan, tempRange){
+	const low = tempRange.low;
+	const high = tempRange.high;
+	const isWithinRange = aPlan.withinRange(low, high);
+    return isWithinRange;
+}
+```
+
+把新函数搬移到HeatingPlan类中
+
+```javascript
+class HeatingPlan {
+	function xxNEWWithinRange(tempRange){
+		const low = tempRange.low;
+		const high = tempRange.high;
+		const isWithinRange = this.withinRange(low, high);
+    	return isWithinRange;
+	} 
+}
+```
+
+剩下的步骤与范例一一样，替换其他调用者，然后把旧函数内联到新函数中，然后改名即可
 
 
 
