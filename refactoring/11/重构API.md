@@ -1030,6 +1030,168 @@ class Scorer {
 }
 ```
 
+## 11.10 以函数取代命令（Replace Command with Function）
+
+1. 名称
+
+2. 一个简单的速写
+
+```javascript
+class ChargeCalculator {
+    constructor(customer, usage){
+        this._customer = customer;
+        this._usage = usage;
+    }
+    execute(){
+        return this._customer.rate * this.usage;
+    }
+}
+```
+
+重构为：
+
+```javascript
+function charge(customer, usage){
+    return customer.rate * usage;
+}
+```
+
+3. 动机
+
+大多数时候，我只是想调用一个函数，让它完成自己的工作就好。如果这个 函数不是太复杂，那么命令对象可能显得费而不惠，我就应该考虑将其变回普通的函数。
+
+4. 做法
+
+- 运用提炼函数，把“创建并执行命令对象”的代码单独提炼到一个函数中
+- 对命令对象在执行阶段用到的函数，逐一使用内联函数
+- 使用改变函数声明，把构造函数的参数转移到执行函数
+- 对于所有的字段，在执行函数中找到引用它们的地方，并改为使用参数。每次修改后都要测试
+- 把“调用构造函数”和“调用执行函数”两步都内联到调用方
+- 参数
+- 用移除死代码把命令类消去
+
+5. 范例
+
+```javascript
+class ChargeCalculator {
+    constructor(customer, usage, provider){
+        this._customer = customer;
+        this._usage = usage;
+        this._provider = provider;
+    }
+    get baseCharge(){
+        return this._customer.baseRate * this.usage;
+    }
+    get charge(){
+        return this.baseCharge + this._provider,connectionCharge;
+    }
+}
+monthCharge = new ChargeCalculator(customer, usage, provider).charge;
+```
+
+首先提炼函数
+
+```javascript
+monthCharge = charge(customer, usage, provider).charge;
+function charge(customer, usage, provider){
+    return new ChargeCalculator(customer, usage, provider).charge;
+}
+```
+
+将有返回值的函数使用提炼变量把返回值提炼出来
+
+```javascript
+class ChargeCalculator {
+    constructor(customer, usage, provider){
+        this._customer = customer;
+        this._usage = usage;
+        this._provider = provider;
+    }
+    get baseCharge(){
+        return this._customer.baseRate * this.usage;
+    }
+    get charge(){
+        const baseCharge = this.baseCharge;
+        return baseCharge + this._provider,connectionCharge;
+    }
+}
+```
+
+然后对支持函数使用内联函数
+
+```javascript
+class ChargeCalculator {
+    constructor(customer, usage, provider){
+        this._customer = customer;
+        this._usage = usage;
+        this._provider = provider;
+    }
+    get baseCharge(){
+        return this._customer.baseRate * this.usage;
+    }
+    get charge(){
+        const baseCharge = this._customer.baseRate * this.usage;
+        return baseCharge + this._provider,connectionCharge;
+    }
+}
+```
+
+把构造函数传入的数据移入主函数
+
+```javascript
+class ChargeCalculator {
+    constructor(customer, usage, provider){
+        this._customer = customer;
+        this._usage = usage;
+        this._provider = provider;
+    }
+    get baseCharge(){
+        return this._customer.baseRate * this.usage;
+    }
+    get charge(customer, usage, provider){
+        const baseCharge = this._customer.baseRate * this.usage;
+        return baseCharge + this._provider,connectionCharge;
+    }
+}
+monthCharge = charge(customer, usage, provider);
+function charge(customer, usage, provider){
+    return new ChargeCalculator(customer, usage, provider)
+        .charge(customer, usage, provider);
+}
+```
+
+然后修改charge函数的实现，改为使用传入的参数，逐一修改
+
+```javascript
+class ChargeCalculator {
+    get charge(customer, usage, provider){
+        const baseCharge = customer.baseRate * usage;
+        return baseCharge + provider,connectionCharge;
+    }
+}
+monthCharge = charge(customer, usage, provider);
+function charge(customer, usage, provider){
+    return new ChargeCalculator()
+        .charge(customer, usage, provider);
+}
+```
+
+最后内联函数，移除死代码
+
+```javascript
+monthCharge = charge(customer, usage, provider);
+function charge(customer, usage, provider){
+    const baseCharge = customer.baseRate * usage;
+    return baseCharge + provider,connectionCharge;
+}
+```
+
+
+
+
+
+
+
 
 
 
