@@ -774,7 +774,76 @@ martin.name = "martin";
 
 ```
 
+## 11.8 以工厂函数取代构造函数（Replace Constructor with Factory Function）
 
+1. 名称
+
+2. 一个简单的速写
+
+```javascript
+leadEngineer = new Employee(document.leadEngineer, 'E');
+```
+
+重构为：
+
+```javascript
+leadEngineer = createEngineer(document.leadEngineer);
+```
+
+3. 动机
+
+构造函数一般有一些丑陋的局限性。工厂函数不受限制。
+
+4. 做法
+
+- 新建一个工厂函数，让它调用现有的构造函数
+- 将调用构造函数的代码改为调用工厂函数
+- 每修改一处，就执行测试
+- 尽量缩小构造函数的可见范围
+
+5. 范例
+
+```javascript
+class Employee {
+    constructor(name, typeCode){
+        this._name = name;
+        this._typeCode = typeCode;
+    }
+    get name() {return this._name;}
+    get type() {
+        return Employee.legalTyeCodes[this._typeCode];
+    }
+    static get leadlTypeCodes(){
+        return {"E": "Engineer", "M": "Manager", "S": "Salesman"};
+    }
+}
+candidata = new Employee(document.name, document.empType);
+const leadEngineer = new Employee(document.leadEngineer, 'E');
+```
+
+创建工厂函数
+
+```javascript
+function createEmployee(name, typeCode){
+    return new Employee(name, typeCode);
+}
+```
+
+调用方修改为使用工厂函数
+
+```javascript
+candidata = createEmployee(document.name, document.empType);
+const leadEngineer = createEmployee(document.leadEngineer, 'E');
+```
+
+但是不够优雅，再新建一个工厂函数
+
+```javascript
+function createEngineer(name){
+    return new Employee(name, 'E');
+}
+const leadEngineer = createEngineer(document.leadEngineer);
+```
 
 
 
