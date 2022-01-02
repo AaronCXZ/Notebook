@@ -581,7 +581,121 @@ class Order {
 }
 ```
 
+## 11.6 以参数取代查询（Replace Query with Parameter）
 
+1. 名称
+
+2. 一个简单的速写
+
+```javascript
+targetTemperature(aPlan)
+function targetTemperature(aPlan){
+    currentTemperature = thermostat.currentTemperature;
+    ...
+}
+```
+
+重构为：
+
+```javascript
+targetTemperature(aPlan, thermostat.currentTemperature)
+function targetTemperature(aPlan){...}
+```
+
+3. 动机
+
+如果把所有依赖关系都变成参数，会导致参数列表冗长重复，如果作用域之间的共享太多，会导致函数间依赖过度，需要权衡
+
+4. 做法
+
+- 对执行查询操作的代码使用提炼变量，将其从函数体中分离出来
+- 选择函数体代码已经不再执行查询操作，对这部分代码使用提炼函数
+- 使用内联变量，消除刚才提炼出来的变量
+- 对原来的函数使用内联函数
+- 对新函数改名，该会原来函数的名字
+
+5. 范例
+
+```javascript
+class HeatingPlan {
+    get targetTemperature(){
+        if (thermostat.selectedTemperature > this._max) return this._max;
+        else if (thermostat.selectedTemperature < this._min) return this._min;
+        else return thermostat.selectedTemperature;
+    }
+}
+
+if (thermostat.targetTemperature > thermostat.currentTemperature) setToHeat();
+else if (thermostat.targetTemperature < thermostat.currentTemperature) setToCool();
+else setOff();
+```
+
+首先提炼变量
+
+```javascript
+class HeatingPlan {
+    get targetTemperature(){
+        const selectedTemperature = thermostat.selectedTemperature;
+        if (selectedTemperature > this._max) return this._max;
+        else if (selectedTemperature < this._min) return this._min;
+        else return selectedTemperature;
+    }
+}
+```
+
+然后提炼函数
+
+```javascript
+class HeatingPlan {
+    get targetTemperature(){
+        const selectedTemperature = thermostat.selectedTemperature;
+        return xxNEWtargetTemperature(selectedTemperature);
+    }
+    xxNEWtargetTemperature(selectedTemperature){
+        if (selectedTemperature > this._max) return this._max;
+        else if (selectedTemperature < this._min) return this._min;
+        else return selectedTemperature;
+    }
+}
+```
+
+把刚才提炼的变量内联回去
+
+```javascript
+class HeatingPlan {
+    get targetTemperature(){
+        return xxNEWtargetTemperature(thermostat.selectedTemperature);
+    }
+    xxNEWtargetTemperature(selectedTemperature){
+        if (selectedTemperature > this._max) return this._max;
+        else if (selectedTemperature < this._min) return this._min;
+        else return selectedTemperature;
+    }
+}
+```
+
+修改调用方代码
+
+```javascript
+if (thePlan.xxNEWtargetTemperature(thermostat.targetTemperature) > thermostat.currentTemperature) setToHeat();
+else if (thePlan.xxNEWtargetTemperature(thermostat.targetTemperature) < thermostat.currentTemperature) setToCool();
+else setOff();
+```
+
+把新函数改名为旧函数
+
+```javascript
+class HeatingPlan {
+    targetTemperature(selectedTemperature){
+        if (selectedTemperature > this._max) return this._max;
+        else if (selectedTemperature < this._min) return this._min;
+        else return selectedTemperature;
+    }
+}
+if (thePlan.targetTemperature(thermostat.targetTemperature) > thermostat.currentTemperature) setToHeat();
+else if (thePlan.xxNEtargetTemperature(thermostat.targetTemperature) < thermostat.currentTemperature) setToCool();
+else setOff();
+```
 
 
 
