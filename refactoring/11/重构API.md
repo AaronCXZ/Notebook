@@ -845,6 +845,195 @@ function createEngineer(name){
 const leadEngineer = createEngineer(document.leadEngineer);
 ```
 
+## 11.9 以命令取代函数（Replace Function with Command）
+
+1. 名称
+
+2. 一个简单的速写
+
+```javascript
+function score(candidate, medicalExam, scoringGuide){
+    let result = 0;
+    let healthLevel = 0;
+    ...
+}
+```
+
+重构为：
+
+```javascript
+class Scorer {
+    constructor(candidate, medicalExam, scoringGuide){
+        this._candidate = candidate;
+        this._medicalExam = medicalExam;
+		this._scoringGuide = scoringGuide;
+    }
+    execute(){
+        thsi._result = 0;
+        this._healthLevel = 0;
+        ...
+    }
+}
+```
+
+3. 动机
+
+命令对象：将函数封装成自己的对象。提供了更大的控制灵活性和更强的表达能力
+
+4. 做法
+
++ 为想要包装的函数创建一个空的类，根据该函数的名字为其命名
++ 使用搬移函数把函数移动到空的类里
++ 可以考虑给每个参数创建一个字段，并在构造函数中添加对应的参数
+
+5. 范例
+
+```javascript
+function score(candidate, medicalExam, scoringGuide){
+    let result = 0;
+    let healthLevel = 0;
+    let highMedicalRiskFlag = false;
+    if (medicalExam.isSmoker){
+        healthLevel += 10;
+        highMedicalRiskFlag = true;
+    }
+    let certificationGrade = "regular";
+    if (scoringGuide.stateWithLowCertification(candidate.originState)){
+        certificationGrade = "low";
+        result -= 5;
+    }
+    result -= Math.max(healthLevel - 5, 0);
+    return result;
+}
+```
+
+创建一个空的类，把上述函数搬移到这个类里
+
+```javascript
+function score(candidate, medicalExam, scoringGuide){
+	return new Scorer().execute(candidate, medicalExam, scoringGuide);
+}
+class Scorer {
+    execute(candidate, medicalExam, scoringGuide){
+    	let result = 0;
+    	let healthLevel = 0;
+    	let highMedicalRiskFlag = false;
+    	if (medicalExam.isSmoker){
+    	    healthLevel += 10;
+    	    highMedicalRiskFlag = true;
+    	}
+    	let certificationGrade = "regular";
+    	if (scoringGuide.stateWithLowCertification(candidate.originState)){
+    	    certificationGrade = "low";
+    	    result -= 5;
+    	}
+    	result -= Math.max(healthLevel - 5, 0);
+    	return result;
+    }
+}
+```
+
+搬移参数到构造函数
+
+```javascript
+function score(candidate, medicalExam, scoringGuide){
+	return new Scorer(candidate, medicalExam, scoringGuide).execute();
+}
+class Scorer {
+    constructor(candidate, medicalExam, scoringGuide){
+        this._candidate = candidate;
+        this._medicalExam = medicalExam;
+        this._scoringGuide = scoringGuide;
+    }
+    execute(){
+    	let result = 0;
+    	let healthLevel = 0;
+    	let highMedicalRiskFlag = false;
+    	if (thsi._medicalExam.isSmoker){
+    	    healthLevel += 10;
+    	    highMedicalRiskFlag = true;
+    	}
+    	let certificationGrade = "regular";
+    	if (this._scoringGuide.stateWithLowCertification(this._candidate.originState)){
+    	    certificationGrade = "low";
+    	    result -= 5;
+    	}
+    	result -= Math.max(healthLevel - 5, 0);
+    	return result;
+    }
+}
+```
+
+把局部变量变成字段
+
+```javascript
+function score(candidate, medicalExam, scoringGuide){
+	return new Scorer(candidate, medicalExam, scoringGuide).execute();
+}
+class Scorer {
+    constructor(candidate, medicalExam, scoringGuide){
+        this._candidate = candidate;
+        this._medicalExam = medicalExam;
+        this._scoringGuide = scoringGuide;
+    }
+    execute(){
+    	this._result = 0;
+    	this._healthLevel = 0;
+    	this._highMedicalRiskFlag = false;
+    	if (thsi._medicalExam.isSmoker){
+       		this._healthLevel += 10;
+        	this._highMedicalRiskFlag = true;
+    	}
+    	this._certificationGrade = "regular";
+    	if (this._scoringGuide.stateWithLowCertification(this._candidate.originState)){
+        	this._certificationGrade = "low";
+        	this._result -= 5;
+    	}
+    	this._result -= Math.max(this._healthLevel - 5, 0);
+    	return this._result;
+    }
+}
+```
+
+使用提炼函数等重构手法
+
+```javascript
+function score(candidate, medicalExam, scoringGuide){
+	return new Scorer(candidate, medicalExam, scoringGuide).execute();
+}
+class Scorer {
+    constructor(candidate, medicalExam, scoringGuide){
+        this._candidate = candidate;
+        this._medicalExam = medicalExam;
+        this._scoringGuide = scoringGuide;
+    }
+    execute(){
+    	this._result = 0;
+    	this._healthLevel = 0;
+    	this._highMedicalRiskFlag = false;
+        
+        this.scoreSmoking();
+    	this._certificationGrade = "regular";
+    	if (this._scoringGuide.stateWithLowCertification(this._candidate.originState)){
+        	this._certificationGrade = "low";
+        	this._result -= 5;
+    	}
+    	this._result -= Math.max(this._healthLevel - 5, 0);
+    	return this._result;
+    }
+    scoreSmoking(){
+        if (thsi._medicalExam.isSmoker){
+        	this._healthLevel += 10;
+        	this._highMedicalRiskFlag = true;
+    	}
+    }
+}
+```
+
+
+
+
+
 
 
 
