@@ -693,13 +693,86 @@ class HeatingPlan {
     }
 }
 if (thePlan.targetTemperature(thermostat.targetTemperature) > thermostat.currentTemperature) setToHeat();
-else if (thePlan.xxNEtargetTemperature(thermostat.targetTemperature) < thermostat.currentTemperature) setToCool();
+else if (thePlan.targetTemperature(thermostat.targetTemperature) < thermostat.currentTemperature) setToCool();
 else setOff();
 ```
 
+## 11.7 移除设值函数（Remove Setting Method）
 
+1. 名称
 
+2. 一个简单的速写
 
+```javascript
+class Person{
+    get name(){...}
+    set name(aString){...}
+}
+```
+
+重构为：
+
+```javascript
+class Person{
+    get name(){...}
+}
+```
+
+3. 动机
+
+4. 做法
+
+- 如果构造函数尚无法得到想要设入字段的值，就使用改变函数声明将这个值以参数的形式传入构造函数。在构造函数中调用设值函数，对字段设值
+- 移除所有在构造函数之外对设值函数的调用，改为使用新的构造函数，每次修改之后都要测试
+- 使用内联函数消去设值函数，如果可能的话，把字段声明为不可变
+- 参数
+
+5. 范例
+
+```javascript
+class Person {
+    get name(){return this._name;}
+    set name(arg){this._name = arg;}
+    get id(){return this._id;}
+    set id(arg){this._id = arg;}
+}
+const martin = new Person();
+martin.name = "martin";
+martin.id = "1234";
+```
+
+首先使用改变函数声明在构造函数中添加对应的参数
+
+```javascript
+class Person {
+    constructor(id){
+        this._id = id;
+    }
+    get name(){return this._name;}
+    set name(arg){this._name = arg;}
+    get id(){return this._id;}
+    set id(arg){this._id = arg;}
+}
+const martin = new Person("1234");
+martin.name = "martin";
+martin.id = "1234";
+```
+
+使用内联函数消去设值函数
+
+```javascript
+class Person {
+    constructor(id){
+        this._id = id;
+    }
+    get name(){return this._name;}
+    set name(arg){this._name = arg;}
+    get id(){return this._id;}
+}
+const martin = new Person("1234");
+martin.name = "martin";
+
+```
 
 
 
