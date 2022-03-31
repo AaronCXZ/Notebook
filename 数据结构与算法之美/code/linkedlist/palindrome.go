@@ -17,7 +17,7 @@ func isPalindrome1(l *LinkedList) bool {
 	s := make([]string, 0, lLen/2)
 	cur := l.head
 	for i := uint(1); i <= lLen; i++ {
-		cur := cur.next
+		cur = cur.next
 		// 奇数个节点时忽略中间的节点
 		if lLen%2 != 0 && i == (lLen/2+1) {
 			continue
