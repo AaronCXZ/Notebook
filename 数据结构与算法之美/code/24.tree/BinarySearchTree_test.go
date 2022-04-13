@@ -2,6 +2,7 @@ package tree
 
 import "testing"
 
+// compareFunc 数据插入时使用的函数，判断大小
 var compareFunc = func(v, nodeV interface{}) int {
 	vInt := v.(int)
 	nodeVInt := nodeV.(int)
