@@ -590,19 +590,315 @@ pipleline {
 
 #### when
 
+when指令允许流水线根据给定的条件决定是否应该执行阶段。
 
+when指令必须包含至少一个条件。如果when指令包含多个条件，所有的子条件必须返回True阶段才会执行。
 
+##### 内置条件
 
+###### branch
 
+当前正在构建的分支与模式给定的分支匹配时，执行这个阶段。例如：` when { branch 'master' }`
 
+###### environment
 
+当指定的环境变量时给定的值时，执行这个步骤。例如` when { environment name: 'DEPLOY_TO', value: 'production' }`
 
+###### expression
 
+当指定的Grovvy表达式为true时，执行这个阶段。例如：` when { expression { return params.DEBUG_BUILD } }`
 
+###### not
 
+当嵌套条件时错误时，执行这个阶段，必须包含一个条件。例如` when{ not { brench 'master' } }`
 
+###### allOf
 
+当所有的嵌套条件都正确时，执行这个阶段，必须包含至少一个条件。例如：` when { allOf { branch 'master'; environment name: 'DEPLOY_TO', value: 'prodution' } } `
 
+###### anyOf
+
+当至少有一个嵌套条件为true时，执行这个阶段，必须包含至少一个条件。例如：` when { anyOf { branch 'master'; branch 'staging' } }`
+
+##### 在进入stage的agent前评估when
+
+默认情况下，如果定义了某个阶段的代理，在进入该stage的agent后改stage的when条件将会被评估，可以通过when块中指定beforeAnent选项来更改次选项。
+
+如果beforeAgent被设置为true，那么会首先对when条件进行评估，只有在when条件为true时参会进入agent。
+
+##### 示例
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example Build') {
+			steps {
+				echo 'Hello world'
+			}
+		}
+		stage('Example Deploy') {
+			when {
+				branch 'production'
+			}
+			steps {
+				echo 'Deploying'
+			}
+		}
+	}
+}
+```
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example Build') {
+			steps {
+				echo 'Hello world'
+			}
+		}
+		stage('Example Deploy') {
+			when {
+				branch 'production'
+				environment name: 'DEPLOY_TO', value: 'production'
+			}
+			steps {
+				echo 'Deploying'
+			}
+		}
+	}
+}
+```
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example Build') {
+			steps {
+				echo 'Hello world'
+			}
+		}
+		stage('Example Deploy') {
+			when {
+				allOf {
+					branch 'production'
+					environment name: 'DEPLOY_TO', value: 'production'
+				}
+			}
+			steps {
+				echo 'Deploying'
+			}
+		}
+	}
+}
+```
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example Build') {
+			steps {
+				echo 'Hello world'
+			}
+		}
+		stage('Example Deploy') {
+			when {
+				branch 'production'
+				anyOf {
+					environment name: 'DEPLOY_TO', value: 'production'
+					environment name: 'DEPLOY_TO', value: 'staging'
+				}
+			}
+			steps {
+				echo 'Deploying'
+			}
+		}
+	}
+}
+```
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example Build') {
+			steps {
+				echo 'Hello world'
+			}
+		}
+		stage('Example Deploy') {
+			when {
+				expression { BRANCH_NAME ==~ /{production|staging}/ }
+				anyOf {
+					environment name: 'DEPLOY_TO', value: 'production'
+					environment name: 'DEPLOY_TO', value: 'staging'
+				}
+			}
+			steps {
+				echo 'Deploying'
+			}
+		}
+	}
+}
+```
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example Build') {
+			steps {
+				echo 'Hello world'
+			}
+		}
+		stage('Example Deploy') {
+			agent {
+				label 'some-label'
+			}
+			when {
+				beforeAgent true
+				branch 'production'
+			}
+			steps {
+				echo 'Deploying'
+			}
+		}
+	}
+}
+```
+
+#### 并行
+
+声明式流水线的阶段可以在他们内部声明多个嵌套阶段，他们将并行执行。
+
+一个阶段必须只有一个steps或parallel的阶段。嵌套阶段本身不能包含进一步的parallel阶段，但是其他的阶段的行为与任何其他stage相同。任何包含parallel的阶段不能包含agent或tools阶段，因为他们没有相关的steps。
+
+通过田间failFast true到包含parallel的stage中，当其中一个过程失败时，可以强制所有的parallel阶段都被终止。
+
+##### 示例
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Non-Parallel Stage') {
+			steps {
+				echo 'This stage will be exected first.'
+			}
+		}
+		stage('Patallel Stage') {
+			when {
+				branch 'master'
+			}
+			failFast true
+			parallel {
+				stage('Branch A') {
+					agent {
+						label 'for-branch-a'
+					}
+					steps {
+						echo "On Branch A"
+					}
+				}
+				stage('Branch B') {
+					agent {
+						label 'for-branch-b'
+					}
+					steps {
+						echo "On Branch B"
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+#### 步骤
+
+声明式流水线可能使用在流水线步骤引用的所有可用的步骤，它包含一个完成的步骤列表，其中添加了下面列出的步骤，这些步骤只在声明式流水线中 only supported
+
+##### 脚本
+
+script步骤需要` [scripted-pipeline]`块并在声明式流水线中执行。对于大多数用例来说，应该声明式流水线中的“脚本”步骤时不必要的。
+
+##### 示例
+
+```
+pipleline {
+	agent any
+	stages {
+		stage('Example) {
+			steps {
+				echo 'Hello world'
+				script {
+					def browsers = ['chrome', 'firefox']
+					for (int i = 0; i < browsers.size(); i++ ) {
+						echo "Testing the ${browers[i]} browser"
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+### 脚本化流水线
+
+脚本化流水线与声明式流水线时一样的，是建立在底层流水线的子系统上的。
+
+脚本化流水线实际上是由Groovy构建的通用DSL。Groovy语言提供的大部分功能都可以用于脚本化流水线的用户。这意味着它是一个非常有表现力和灵活的工具，可以通过它编写持续交付流水线。
+
+#### 控制流
+
+脚本化流水线从Jenkinsfile的顶部开始向下串行执行，因此提供流程控制取决于Groovy表达式，比如if/else条件，例如：
+
+```
+node {
+	stage('Example') {
+		if (env.BRANCH_NAME == 'master' ) {
+			echo 'I only execute on the master branch'
+		} else {
+			echo 'I execute elsewhere'
+		}
+	}
+}
+```
+
+使用Groovy的异常处理来管理脚本化流水线控制。使用try/catch/finally。例如：
+
+```
+node {
+	stage('Example') {
+		try {
+			sh 'exit 1'
+		}
+		catch (exc) {
+			echo 'Something fauled, I should sound the klaxons'
+			throw
+		}
+	}
+}
+```
+
+#### 步骤
+
+与声明式流水线相同
+
+#### 区别普通Groovy
+
+流水线可以在Jenkins master重启后继续运行，脚本化的流水线序列化数据到主服务器。一些Groovy的习惯用法不能完全支持。
+
+### 流水线开发工具
+
+#### Blue Ocean编辑器
+
+#### 命令行流水线linter
+
+#### IDE集成
 
 
 
