@@ -1,0 +1,87 @@
+// Jenkinsfile (Declarative Pipeline)
+pipeline {
+  agent any
+  stages {
+    stage('module1') {
+      parallel {
+        stage("1"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+        stage("3"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+      }
+      parallel {
+        stage("2"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+        stage("4"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+      }
+    }
+    stage('module2') {
+      parallel {
+        stage("1"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+        stage("3"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+      }
+      parallel {
+        stage("2"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+        stage("4"){
+          agent {
+						label 'for-branch-a'
+					}
+          steps {
+            sh cpcn@{{ $IP }} ~/script/update_savelog_v2.sh
+          }
+        }
+      }
+    }
+  }
+  post {
+    regression {
+      echo '有问题，需要排查'
+    }
+  }
+}

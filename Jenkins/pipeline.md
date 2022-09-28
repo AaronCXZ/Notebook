@@ -66,7 +66,7 @@ Jenkinsfile能用两种语法进行编写：声明式和脚本化。通常都是
 
 pipeline块定义了整个流水线中完成的所有工作
 
- ```jenkinsfile
+```jenkinsfile
  pipeline {
  	agent any // 指定执行流水线的节点，any表示任意节点执行
  	stages {
@@ -87,7 +87,7 @@ pipeline块定义了整个流水线中完成的所有工作
  		}
  	}
  }
- ```
+```
 
 ### 脚本化流水线基础
 
@@ -96,7 +96,7 @@ pipeline块定义了整个流水线中完成的所有工作
 - 通过在Jenkins队列中添加一项来调度块中包含的步骤。节点上的执行器一空闲，该步骤就会执行。
 - 创建一个工作区（特定为特定流水间建立的目录），其中工作可以在从源代码控制检出的文件上完成。
 
- ```jenkinsfile
+```jenkinsfile
  node { // 执行流水线的节点
  	stage('Build') { // 定义“Build”阶段，在脚本化流水线中实现stage块，可以清楚的显示Jenkins UI中的每个stage的任务子集
  		// 执行与“Build”阶段相关的步骤
@@ -108,7 +108,7 @@ pipeline块定义了整个流水线中完成的所有工作
  		// 执行与“Deploy”阶段相关的步骤
  	}
  }
- ```
+```
 
 ### 流水线语法
 
@@ -363,15 +363,15 @@ options指令允许从流水线内部配置特定于流水线的选项。流水�
 
 ###### buildDisacrder
 
-为最近的流水线运行的特定数量保存组件和控制台输出。例如`options { buildDisacrder(logRotator(numTokeepStr: '1')) }`
+为最近的流水线运行的特定数量保存组件和控制台输出。例如 `options { buildDisacrder(logRotator(numTokeepStr: '1')) }`
 
 ###### disableConcurrentBuilds
 
-不允许同时执行流水线，可被用来防止同时访问共享资源。例如` options { disableConcurrentBuilds() }`
+不允许同时执行流水线，可被用来防止同时访问共享资源。例如 ` options { disableConcurrentBuilds() }`
 
 ###### overrideIndexTriggers
 
-允许覆盖分支索引触发器的默认处理。如果分支索引在触发器在多个分支或组织标签中禁用，` options { overrideIndexTriggers(true) } ` 将只允许他们用于促工作，否则` options { overrideIndexTriggers(false) }`只会禁用该作业的分支索引触发器
+允许覆盖分支索引触发器的默认处理。如果分支索引在触发器在多个分支或组织标签中禁用，`options { overrideIndexTriggers(true) }` 将只允许他们用于促工作，否则 ` options { overrideIndexTriggers(false) }`只会禁用该作业的分支索引触发器
 
 ###### skipDefaultChechout
 
@@ -491,7 +491,7 @@ triggers指令定义了流水线被重新触发的自动化方法。对于集成
 
 ###### cron
 
-接收cron央视的字符串来定义要重新触发流水线的常规间隔，比如` triggers { cron('H */4 * * 1-5') }`
+接收cron央视的字符串来定义要重新触发流水线的常规间隔，比如 ` triggers { cron('H */4 * * 1-5') }`
 
 ###### pollSCM
 
@@ -499,7 +499,7 @@ triggers指令定义了流水线被重新触发的自动化方法。对于集成
 
 ###### upstream
 
-接收逗号分隔的字符串和阈值。当字符串中的任何作业以最小阈值结束时，流水线被重新触发，例如` triggers { upstream(upstreamPorjects: 'job1,job2', threshold: hudson.model.Result.SUCCESS) }`
+接收逗号分隔的字符串和阈值。当字符串中的任何作业以最小阈值结束时，流水线被重新触发，例如 ` triggers { upstream(upstreamPorjects: 'job1,job2', threshold: hudson.model.Result.SUCCESS) }`
 
 ##### 示例
 
@@ -602,7 +602,7 @@ when指令必须包含至少一个条件。如果when指令包含多个条件，
 
 ###### environment
 
-当指定的环境变量时给定的值时，执行这个步骤。例如` when { environment name: 'DEPLOY_TO', value: 'production' }`
+当指定的环境变量时给定的值时，执行这个步骤。例如 ` when { environment name: 'DEPLOY_TO', value: 'production' }`
 
 ###### expression
 
@@ -610,11 +610,11 @@ when指令必须包含至少一个条件。如果when指令包含多个条件，
 
 ###### not
 
-当嵌套条件时错误时，执行这个阶段，必须包含一个条件。例如` when{ not { brench 'master' } }`
+当嵌套条件时错误时，执行这个阶段，必须包含一个条件。例如 ` when{ not { brench 'master' } }`
 
 ###### allOf
 
-当所有的嵌套条件都正确时，执行这个阶段，必须包含至少一个条件。例如：` when { allOf { branch 'master'; environment name: 'DEPLOY_TO', value: 'prodution' } } `
+当所有的嵌套条件都正确时，执行这个阶段，必须包含至少一个条件。例如：`when { allOf { branch 'master'; environment name: 'DEPLOY_TO', value: 'prodution' } }`
 
 ###### anyOf
 
@@ -776,7 +776,7 @@ pipleline {
 
 一个阶段必须只有一个steps或parallel的阶段。嵌套阶段本身不能包含进一步的parallel阶段，但是其他的阶段的行为与任何其他stage相同。任何包含parallel的阶段不能包含agent或tools阶段，因为他们没有相关的steps。
 
-通过田间failFast true到包含parallel的stage中，当其中一个过程失败时，可以强制所有的parallel阶段都被终止。
+通过添加failFast true到包含parallel的stage中，当其中一个过程失败时，可以强制所有的parallel阶段都被终止。
 
 ##### 示例
 
@@ -823,7 +823,7 @@ pipleline {
 
 ##### 脚本
 
-script步骤需要` [scripted-pipeline]`块并在声明式流水线中执行。对于大多数用例来说，应该声明式流水线中的“脚本”步骤时不必要的。
+script步骤需要 ` [scripted-pipeline]`块并在声明式流水线中执行。对于大多数用例来说，应该声明式流水线中的“脚本”步骤时不必要的。
 
 ##### 示例
 
@@ -899,16 +899,3 @@ node {
 #### 命令行流水线linter
 
 #### IDE集成
-
-
-
-
-
-
-
-
-
-
-
-
-
